@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Reaction time task</title>
+    <script src="jspsych-6.3.1/jspsych.js"></script>
+    <script src="jspsych-6.3.1/plugins/jspsych-html-keyboard-response.js"></script>
+    <script src="jspsych-6.3.1/plugins/jspsych-image-keyboard-response.js"></script>
+    <script src="jspsych-6.3.1/plugins/jspsych-preload.js"></script>
+    <link href="jspsych-6.3.1/css/jspsych.css" rel="stylesheet" type="text/css">
+  </head>
+  <body></body>
+  <script type="text/javascript">
+    var timeline = [];
+    const blue_img_path = "img/blue.png";
+    const orange_img_path = "img/orange.png";
+
+    var preload_trial = {
+      type: "preload",
+      images: [blue_img_path, orange_img_path]
+    };
+    timeline.push(preload_trial);
+
+    var welcome = {
+        type: "html-keyboard-response",
+        stimulus: "Welcome to the experiment. Press any key to begin."
+    };
+    timeline.push(welcome);
+
+    var instructions = {
+      type: "html-keyboard-response",
+      stimulus: `
+        <p>In this experiment, a circle will appear in the center 
+        of the screen.</p><p>If the circle is <strong>blue</strong>, 
+        press the letter F on the keyboard as fast as you can.</p>
+        <p>If the circle is <strong>orange</strong>, press the letter J 
+        as fast as you can.</p>
+        <div style='width: 700px;'>
+        <div style='float: left;'><img src='img/blue.png'></img>
+        <p class='small'><strong>Press the F key</strong></p></div>
+        <div class='float: right;'><img src='img/orange.png'></img>
+        <p class='small'><strong>Press the J key</strong></p></div>
+        </div>
+        <p>Press any key to begin.</p>
+      `,
+      post_trial_gap: 2000
+    };
+    timeline.push(instructions);
+
+    var choices = ["f", "j"];
+    // var blue_trial = {
+    //   type: "image-keyboard-response",
+    //   stimulus: blue_img_path,
+    //   choices
+    // };
+    // var orange_trial = {
+    //   type: "image-keyboard-response",
+    //   stimulus: orange_img_path,
+    //   choices
+    // };
+    // timeline.push(blue_trial, orange_trial);
+
+    var fixation_trial = {
+      type: "html-keyboard-response",
+      stimulus: `<div style="font-size: 60px;">+</div>`,
+      choices: jsPsych.NO_KEYS,
+      trial_duration: function() {
+        const MIN_DURATION = 500;
+        const MAX_DURATION = 1500;
+        return MIN_DURATION + Math.floor(Math.random() * (MAX_DURATION - MIN_DURATION));
+      },
+      data: {
+        task: 'fixation'
+      }
+    };
+
+    var test_trial = {
+      type: "image-keyboard-response",
+      stimulus: jsPsych.timelineVariable("stimulus"),
+      choices,
+      data: {
+        task: 'discrimination',
+        correct_response: jsPsych.timelineVariable("correct_response")
+      },
+      on_finish: function(data) {
+        data.is_correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
+      }
+    };
+
+    var stimuli = [
+      { stimulus: blue_img_path, correct_response: choices[0] },
+      { stimulus: orange_img_path, correct_response: choices[1] }
+    ];
+
+    var fixation_test_procedure = {
+      timeline: [fixation_trial, test_trial],
+      timeline_variables: stimuli,
+      randomize_order: true,
+      repetitions: 6
+    };
+    timeline.push(fixation_test_procedure)
+
+
+    var feedback_trial = {
+      type: "html-keyboard-response",
+      stimulus: function() {
+        let response_trials = jsPsych.data.get().filter({task: 'discrimination'});
+        let correct_trials = response_trials.filter({is_correct: true});
+        let incorrect_trials = response_trials.filter({is_correct: false});
+        let accuracy = Math.round(correct_trials.count() / response_trials.count() * 100)
+        let rt = Math.round(response_trials.select('rt').mean())
+        let correct_rt = Math.round(correct_trials.select('rt').mean())
+        let incorrect_rt = Math.round(incorrect_trials.select('rt').mean())
+        return `
+          <p>Your accuracy is: ${accuracy}% correct.</p>
+          <p>Your mean response time is: ${rt}ms.</p
+          <p>Your mean response time for correct trials is: ${correct_rt}ms.</p>
+          <p>Your mean response time for incorrect trials is: ${incorrect_rt}ms.</p>
+          <p>Press any key to complete the experiment. Thank you!</p>
+        `;
+      }
+    };
+    timeline.push(feedback_trial);
+
+    jsPsych.init({
+        timeline,
+        // on_finish: function() {
+        //   jsPsych.data.displayData();
+        // }
+    });
+  </script>
+</html>

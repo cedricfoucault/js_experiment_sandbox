@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Canvas sandbox</title>
+    <script src="jspsych-6.3.1/jspsych.js"></script>
+    <script src="jspsych-6.3.1/plugins/jspsych-canvas-keyboard-response.js"></script>
+    <link href="jspsych-6.3.1/css/jspsych.css" rel="stylesheet" type="text/css">
+  </head>
+  <script type="text/javascript">
+    const CANVAS_WIDTH = 800;
+    const CANVAS_HEIGHT = 9 / 16 * CANVAS_WIDTH;
+    const STIMULUS_RADIUS = 20;
+    const STIMULI_SPACING = 40;
+    const SOA = 1400; // ms
+    const STIMULUS_SPEED = (STIMULUS_RADIUS + STIMULI_SPACING) / SOA; // px / ms
+
+    function stimulus_color_with_value(value) {
+      return value == 0 ? "#3355FF" : "#FFDD33";
+    }
+    
+    function stimulus_with_value_position(value, x0, y0) {
+      var stimulus = {
+        value: value,
+        x: x0,
+        y: y0,
+        color: stimulus_color_with_value(value),
+        draw: function(ctx) {
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, STIMULUS_RADIUS, 0, 2 * Math.PI);
+          ctx.fill();
+        },
+        update_position: function(time_elapsed) {
+          console.log(time_elapsed);
+          this.x = x0 - STIMULUS_SPEED * time_elapsed;
+        },
+        is_off_screen: function() {
+          return this.x < -STIMULUS_RADIUS || this.x > CANVAS_WIDTH + STIMULUS_RADIUS
+        }
+      }
+      return stimulus;
+    }
+
+    var observation_values = [0,1,0,0,1,0,1,1,0,0];
+    var stimuli = [];
+    var x0 = CANVAS_WIDTH + STIMULUS_RADIUS;
+    var y0 = CANVAS_HEIGHT / 2;
+    for (var i = 0; i < observation_values.length; i++) {
+      stimulus = stimulus_with_value_position(observation_values[i], x0, y0);
+      stimuli.push(stimulus);
+      x0 += STIMULUS_RADIUS * 2 + STIMULI_SPACING;
+    }
+
+    function draw_canvas(canvas){
+        var ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // draw stimuli
+        var did_draw_something = false;
+        for (var i = 0; i < stimuli.length; i++) {
+          stimulus = stimuli[i];
+          if (!stimulus.is_off_screen()) {
+            stimulus.draw(ctx);
+            did_draw_something = true;
+          }
+        }
+        // draw enclosing frame
+        ctx.fillStyle = "#000000";
+        ctx.strokeRect(0, 0, canvas.width, canvas.height);
+        return did_draw_something;
+    }
+
+    var start;
+    function step_animation(time) {
+      if (start === undefined) {
+        start = time;
+      } else {
+        const time_elapsed = time - start;
+        for (var i = 0; i < stimuli.length; i++) {
+          stimuli[i].update_position(time_elapsed);
+        }
+      }
+
+      let canvas = document.getElementById("jspsych-canvas-stimulus");
+      is_not_done = draw_canvas(canvas);
+
+      if (is_not_done) {
+        window.requestAnimationFrame(step_animation);
+      }
+    }
+
+    trial_pre = {
+        type:"canvas-keyboard-response",
+        stimulus: draw_canvas,
+        canvas_size: [CANVAS_HEIGHT, CANVAS_WIDTH],
+        choices: jsPsych.ALL_KEYS
+    }
+
+    trial_main = {
+        type:"canvas-keyboard-response",
+        stimulus: draw_canvas,
+        canvas_size: [CANVAS_HEIGHT, CANVAS_WIDTH],
+        choices: jsPsych.NO_KEYS,
+        on_load: function() {
+          window.requestAnimationFrame(step_animation);
+        }
+    }
+
+    var timeline = [trial_pre, trial_main];
+    jsPsych.init({
+        timeline
+    });
+  </script>
+  <body></body>
+</html>
