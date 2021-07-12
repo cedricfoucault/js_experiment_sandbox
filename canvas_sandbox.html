@@ -7,15 +7,80 @@
     <link href="jspsych-6.3.1/css/jspsych.css" rel="stylesheet" type="text/css">
   </head>
   <script type="text/javascript">
+    const OBSERVATION_SEQUENCES = [
+      [1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0],
+      [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0],
+      [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+      [1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+      [0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
+      [0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1],
+      [1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1],
+      [0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0],
+      [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1]];
+
     const CANVAS_WIDTH = 800;
     const CANVAS_HEIGHT = 9 / 16 * CANVAS_WIDTH;
     const STIMULUS_RADIUS = 20;
     const STIMULI_SPACING = 40;
     const SOA = 1400; // ms
-    const STIMULUS_SPEED = (STIMULUS_RADIUS + STIMULI_SPACING) / SOA; // px / ms
+    const STIMULUS_SPEED = (STIMULUS_RADIUS * 2 + STIMULI_SPACING) / SOA; // px / ms
+    
+    const RESPONSE_WIDGET_STIMULUS_RADIUS = 10;
+    const RESPONSE_WIDGET_STIMULUS_SPACING = 2;
+    const RESPONSE_WIDGET_FRAME_PADDING = 10;
+    const RESPONSE_WIDGET_N_STIMULI = 10;
+    const RESPONSE_WIDGET_FRAME_WIDTH = (
+      RESPONSE_WIDGET_STIMULUS_RADIUS * 2 * RESPONSE_WIDGET_N_STIMULI
+      + RESPONSE_WIDGET_STIMULUS_SPACING * (RESPONSE_WIDGET_N_STIMULI - 1)
+      + RESPONSE_WIDGET_FRAME_PADDING * 2
+    );
+    const RESPONSE_WIDGET_FRAME_HEIGHT = 54;
+    const RESPONSE_WIDGET_FRAME_BOTTOM_TO_BOTTOM = 36;
+    const RESPONSE_WIDGET_FRAME_LEFT = (CANVAS_WIDTH - RESPONSE_WIDGET_FRAME_WIDTH) / 2;
+    const RESPONSE_WIDGET_FRAME_TOP = CANVAS_HEIGHT - RESPONSE_WIDGET_FRAME_HEIGHT - RESPONSE_WIDGET_FRAME_BOTTOM_TO_BOTTOM;
+    const RESPONSE_WIDGET_STIMULUS_TOP = CANVAS_HEIGHT - (RESPONSE_WIDGET_FRAME_PADDING + 2 * RESPONSE_WIDGET_STIMULUS_RADIUS + RESPONSE_WIDGET_FRAME_BOTTOM_TO_BOTTOM);
+    const RESPONSE_WIDGET_TRIANGLE_HEIGHT = 5;
+    const RESPONSE_WIDGET_TRIANGLE_WIDTH = 5;
+    const RESPONSE_WIDGET_TRIANGLE_TOP = RESPONSE_WIDGET_STIMULUS_TOP - RESPONSE_WIDGET_TRIANGLE_HEIGHT;
+    const RESPONSE_WIDGET_TEXT_BASELINE_TO_CURSOR_TRIANGLE_TOP = 5;
+    const RESPONSE_WIDGET_TEXT_BASELINE = RESPONSE_WIDGET_TRIANGLE_TOP - RESPONSE_WIDGET_TEXT_BASELINE_TO_CURSOR_TRIANGLE_TOP;
+    const RESPONSE_WIDGET_COLOR_ACTIVE = "#000000";
+    const RESPONSE_WIDGET_COLOR_INACTIVE = "#CDCDCD";
+
+    const SCORE_TEXT_CENTER_X = CANVAS_WIDTH / 2;
+    const SCORE_TEXT_BASELINE_Y = CANVAS_HEIGHT - 10;
+    const SCORE_TEXT_MAX_WIDTH = 50;
+    const FEEDBACK_TEXT_CENTER_X = SCORE_TEXT_CENTER_X;
+    const FEEDBACK_TEXT_BASELINE_Y = SCORE_TEXT_BASELINE_Y - 10;
+
+    let observation_sequence_index = Math.floor(Math.random() * OBSERVATION_SEQUENCES.length);
+    let observation_values = OBSERVATION_SEQUENCES[observation_sequence_index];
+    console.log(`observation_sequence_index: ${observation_sequence_index}`);
+    var current_observation_index = -1;
+
+    const POSSIBLE_RESPONSES = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
+    const POSSIBLE_RESPONSE_TEXTS = ["1:9", "2:8", "3:7", "4:6", "5:5", "6:4", "7:3", "8:2", "9:1"];
+    var current_response_index = 4;
+    
+    var current_score = 0;
+
+    var is_feedback_visible = false;
+    var feedback_gain = 0;
 
     function stimulus_color_with_value(value) {
-      return value == 0 ? "#3355FF" : "#FFDD33";
+      return value == 0 ? "#FFDD33" : "#3355FF";
     }
     
     function stimulus_with_value_position(value, x0, y0) {
@@ -23,16 +88,14 @@
         value: value,
         x: x0,
         y: y0,
-        color: stimulus_color_with_value(value),
         draw: function(ctx) {
-          ctx.fillStyle = this.color;
+          ctx.fillStyle = stimulus_color_with_value(this.value);
           ctx.beginPath();
           ctx.arc(this.x, this.y, STIMULUS_RADIUS, 0, 2 * Math.PI);
           ctx.fill();
         },
-        update_position: function(time_elapsed) {
-          console.log(time_elapsed);
-          this.x = x0 - STIMULUS_SPEED * time_elapsed;
+        update_position: function(current_trial_index, time_since_start_of_trial) {
+          this.x = x0 - STIMULUS_SPEED * (current_trial_index * SOA + time_since_start_of_trial);
         },
         is_off_screen: function() {
           return this.x < -STIMULUS_RADIUS || this.x > CANVAS_WIDTH + STIMULUS_RADIUS
@@ -41,7 +104,6 @@
       return stimulus;
     }
 
-    var observation_values = [0,1,0,0,1,0,1,1,0,0];
     var stimuli = [];
     var x0 = CANVAS_WIDTH + STIMULUS_RADIUS;
     var y0 = CANVAS_HEIGHT / 2;
@@ -54,60 +116,265 @@
     function draw_canvas(canvas){
         var ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
         // draw stimuli
-        var did_draw_something = false;
         for (var i = 0; i < stimuli.length; i++) {
           stimulus = stimuli[i];
           if (!stimulus.is_off_screen()) {
             stimulus.draw(ctx);
-            did_draw_something = true;
           }
         }
+
+        // draw response widget
+        ctx.fillStyle = "#000000";
+        ctx.strokeRect(RESPONSE_WIDGET_FRAME_LEFT, RESPONSE_WIDGET_FRAME_TOP,
+          RESPONSE_WIDGET_FRAME_WIDTH, RESPONSE_WIDGET_FRAME_HEIGHT);
+        x_response_stimulus = RESPONSE_WIDGET_FRAME_LEFT + RESPONSE_WIDGET_FRAME_PADDING + RESPONSE_WIDGET_STIMULUS_RADIUS;
+        y_response_stimulus = RESPONSE_WIDGET_STIMULUS_TOP + RESPONSE_WIDGET_STIMULUS_RADIUS;
+        for (var i = 0; i < RESPONSE_WIDGET_N_STIMULI; i++) {
+          var value = i <= current_response_index ? 1 : 0;
+          // stimulus = stimulus_with_value_position(value, x_response_stimulus, y_response_stimulus);
+          // stimulus.draw(ctx);
+          ctx.fillStyle = stimulus_color_with_value(value);
+          ctx.beginPath();
+          ctx.arc(x_response_stimulus, y_response_stimulus, RESPONSE_WIDGET_STIMULUS_RADIUS, 0, 2 * Math.PI);
+          ctx.fill();
+
+          var is_active = (i == current_response_index);
+          var color_for_active = is_active ? RESPONSE_WIDGET_COLOR_ACTIVE : RESPONSE_WIDGET_COLOR_INACTIVE;
+          ctx.fillStyle = color_for_active;
+          if (i < RESPONSE_WIDGET_N_STIMULI - 1) {
+            // draw separator
+            separator_x = x_response_stimulus + RESPONSE_WIDGET_STIMULUS_RADIUS;
+            ctx.fillRect(
+              separator_x,
+              RESPONSE_WIDGET_STIMULUS_TOP,
+              1,
+              2 * RESPONSE_WIDGET_STIMULUS_RADIUS);
+            if (is_active) {
+              // draw cursor triangle
+              ctx.beginPath();
+              ctx.moveTo(separator_x, RESPONSE_WIDGET_STIMULUS_TOP);
+              ctx.lineTo(separator_x - RESPONSE_WIDGET_TRIANGLE_WIDTH / 2,
+                RESPONSE_WIDGET_TRIANGLE_TOP);
+              ctx.lineTo(separator_x + RESPONSE_WIDGET_TRIANGLE_WIDTH / 2,
+                RESPONSE_WIDGET_TRIANGLE_TOP);
+              ctx.closePath();
+              ctx.fill();
+            }
+            // draw text
+            ctx.save();
+            ctx.textAlign = "center";
+            ctx.font = '11px sans-serif';
+            ctx.fillText(POSSIBLE_RESPONSE_TEXTS[i], separator_x, RESPONSE_WIDGET_TEXT_BASELINE);
+            ctx.restore();
+          }
+
+          x_response_stimulus += RESPONSE_WIDGET_STIMULUS_RADIUS * 2 + RESPONSE_WIDGET_STIMULUS_SPACING;
+        }
+
+        // draw score
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.font = '10px sans-serif';
+        ctx.fillStyle = "#000000";
+        ctx.fillText(`Score: ${current_score}`, SCORE_TEXT_CENTER_X, SCORE_TEXT_BASELINE_Y, SCORE_TEXT_MAX_WIDTH);
+        // draw feedback
+        if (is_feedback_visible) {
+          let feedback_string = feedback_gain >= 0 ? `+${feedback_gain}` : `${feedback_gain}`
+          ctx.fillStyle = stimulus_color_with_value(observation_values[current_observation_index]);
+          ctx.fillText(feedback_string, FEEDBACK_TEXT_CENTER_X, FEEDBACK_TEXT_BASELINE_Y);
+        }
+        ctx.restore();
+
         // draw enclosing frame
         ctx.fillStyle = "#000000";
         ctx.strokeRect(0, 0, canvas.width, canvas.height);
-        return did_draw_something;
     }
 
-    var start;
+    var start_of_trial;
+    var is_main_done = false;
     function step_animation(time) {
-      if (start === undefined) {
-        start = time;
-      } else {
-        const time_elapsed = time - start;
-        for (var i = 0; i < stimuli.length; i++) {
-          stimuli[i].update_position(time_elapsed);
-        }
-      }
-
       let canvas = document.getElementById("jspsych-canvas-stimulus");
-      is_not_done = draw_canvas(canvas);
+      if (canvas) {
+        if (start_of_trial === undefined) {
+          start_of_trial = time;
+        } else {
+          const time_since_start_of_trial = time - start_of_trial;
+          for (var i = 0; i < stimuli.length; i++) {
+            stimuli[i].update_position(current_observation_index, time_since_start_of_trial);
+          }
+        }
 
-      if (is_not_done) {
+        draw_canvas(canvas);
+      }
+      if (!is_main_done) {
         window.requestAnimationFrame(step_animation);
       }
     }
 
-    trial_pre = {
+    const RESPONSE_INCREMENT_KEY = "ArrowRight";
+    const RESPONSE_DECREMENT_KEY = "ArrowLeft";
+    function handle_keyboard_press(info) {
+      if (jsPsych.pluginAPI.compareKeys(info.key, RESPONSE_INCREMENT_KEY)) {
+        if (current_response_index < POSSIBLE_RESPONSES.length - 1) {
+          current_response_index += 1;
+        }
+      } else if (jsPsych.pluginAPI.compareKeys(info.key, RESPONSE_DECREMENT_KEY)) {
+        if (current_response_index > 0) {
+          current_response_index -= 1;
+        }
+      }
+    }
+
+    function is_inside_response_widget(x, y) {
+      return (
+        x > RESPONSE_WIDGET_FRAME_LEFT
+        && x < RESPONSE_WIDGET_FRAME_LEFT + RESPONSE_WIDGET_FRAME_WIDTH
+        && y > RESPONSE_WIDGET_FRAME_TOP
+        && y < RESPONSE_WIDGET_FRAME_TOP + RESPONSE_WIDGET_FRAME_HEIGHT
+      );
+    }
+
+    function get_response_index_for_mouse_point(x, y) {
+      const x_first_stimulus_right = RESPONSE_WIDGET_FRAME_LEFT + RESPONSE_WIDGET_FRAME_PADDING + (2 * RESPONSE_WIDGET_STIMULUS_RADIUS)
+      const x_last_stimulus_left = (
+        x_first_stimulus_right
+        + (2 * RESPONSE_WIDGET_STIMULUS_RADIUS) * (RESPONSE_WIDGET_N_STIMULI - 2)
+        + RESPONSE_WIDGET_STIMULUS_SPACING * (RESPONSE_WIDGET_N_STIMULI - 1)
+      )
+      if (x < x_first_stimulus_right) {
+        return 0;
+      } else if (x > x_last_stimulus_left) {
+        return POSSIBLE_RESPONSES.length - 1;
+      } else {
+        return Math.round((x - x_first_stimulus_right) / (x_last_stimulus_left - x_first_stimulus_right) * (POSSIBLE_RESPONSES.length - 1));
+      }
+    }
+
+    function handle_mousemove(event) {
+      var x = event.offsetX;
+      var y = event.offsetY;
+      // console.log(`offsetX: ${x + 'px'}`);
+      // console.log(`offsetY: ${y + 'px'}`);
+      if (is_inside_response_widget(x, y)) {
+        // console.log("inside widget!");
+        var response_index = get_response_index_for_mouse_point(x, y);
+        // console.log(`response index: ${response_index}`);
+        current_response_index = response_index;
+      }
+    }
+
+    function start_handling_canvas_mousemove() {
+      let canvas = document.getElementById("jspsych-canvas-stimulus");
+      if (canvas) {
+        canvas.onmousemove = handle_mousemove;
+      }
+    }
+
+    function gain_with_prediction_observation(prediction, observation) {
+      const log_likelihood = observation == 1 ? Math.log2(prediction) : Math.log2(1 - prediction);
+      const log_likelihood_chance = Math.log2(0.5);
+      const gain_at_chance = 0;
+      const scale = 10 / (Math.log2(0.9) - log_likelihood_chance);
+      // console.log(`observation: ${observation}, prediction: ${prediction}, log_likelihood: ${log_likelihood}, scale: ${scale}`);
+      gain = Math.floor(gain_at_chance + (log_likelihood - log_likelihood_chance) * scale)
+      // console.log(`gain: ${gain}`);
+      return gain;
+    }
+
+    var trial_pre = {
         type:"canvas-keyboard-response",
         stimulus: draw_canvas,
         canvas_size: [CANVAS_HEIGHT, CANVAS_WIDTH],
-        choices: jsPsych.ALL_KEYS
-    }
+        choices: jsPsych.ALL_KEYS,
+        on_load: function() {
+          start_handling_canvas_mousemove();
+        }
+    };
 
-    trial_main = {
+    var main_trials = [];
+    var keyboard_listener;
+    for (var i = 0; i < observation_values.length; i++) {
+      let observation_value = observation_values[i];
+      var trial_i = {
         type:"canvas-keyboard-response",
         stimulus: draw_canvas,
         canvas_size: [CANVAS_HEIGHT, CANVAS_WIDTH],
         choices: jsPsych.NO_KEYS,
-        on_load: function() {
-          window.requestAnimationFrame(step_animation);
+        trial_duration: SOA,
+        data: {
+          observation_index: i,
+          observation_value: observation_value,
+        },
+        on_start: function(trial) {
+          current_observation_index = trial.data.observation_index;
+          if (trial.data.observation_index > 0) {
+            // compute the subject's gain for this trial
+            var gain = 0;
+            var last_response = jsPsych.data.getLastTrialData().select("response").values;
+            if (last_response > 0 && last_response < 1) {
+              gain = gain_with_prediction_observation(last_response, observation_value);
+            }
+            feedback_gain = gain;
+            current_score += gain;
+            trial.data.feedback_gain = gain;
+            trial.data.current_score = current_score;
+          }
         }
+      };
+      if (i == 0) {
+        trial_i.on_load = function() {
+          window.requestAnimationFrame(step_animation);
+
+          keyboard_listener = jsPsych.pluginAPI.getKeyboardResponse({
+            callback_function: handle_keyboard_press,
+            valid_responses: [RESPONSE_INCREMENT_KEY, RESPONSE_DECREMENT_KEY],
+            persist: true
+          });
+          start_handling_canvas_mousemove();
+        };
+      } else {
+        trial_i.on_load = function() {
+          start_of_trial = undefined;
+          is_feedback_visible = true;
+          start_handling_canvas_mousemove();
+        }
+      }
+      // if (i < observation_values.length - 1) {
+      trial_i.on_finish = function(data) {
+        // capture current response
+        data.response = POSSIBLE_RESPONSES[current_response_index];
+        // console.log("response captured: %.1f", data.response);
+        is_feedback_visible = false;
+      }
+      // }
+      main_trials.push(trial_i)
+    }
+    var main_procedure = {
+      timeline: main_trials,
+      on_timeline_finish: function() {
+        console.log('Experiment has finished.');
+        is_main_done = true;
+        jsPsych.pluginAPI.cancelKeyboardResponse(keyboard_listener);
+      }
     }
 
-    var timeline = [trial_pre, trial_main];
+    var timeline = [trial_pre, main_procedure];
     jsPsych.init({
-        timeline
+        timeline,
+        on_finish: function () { 
+            jsPsych.data.displayData('csv');
+
+            // select all trials
+            var all_data = jsPsych.data.get();
+            // get csv representation of data and log to console
+            console.log(all_data.csv());
+            // save it locally
+            const filepath = `experiment_data_${new Date().toISOString().substring(0, 13)}.csv`;
+            all_data.localSave('csv', filepath);
+            console.log(`saving to ${filepath}`);
+        }
     });
   </script>
   <body></body>
