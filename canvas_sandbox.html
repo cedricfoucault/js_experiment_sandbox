@@ -193,16 +193,20 @@
     }
 
     var start_of_trial;
+    var is_main_started = false;
     var is_main_done = false;
     function step_animation(time) {
       let canvas = document.getElementById("jspsych-canvas-stimulus");
       if (canvas) {
-        if (start_of_trial === undefined) {
-          start_of_trial = time;
-        } else {
-          const time_since_start_of_trial = time - start_of_trial;
-          for (var i = 0; i < stimuli.length; i++) {
-            stimuli[i].update_position(current_observation_index, time_since_start_of_trial);
+        // update the positions of stimuli once the main experiment has started
+        if (is_main_started) {
+          if (start_of_trial === undefined) {
+            start_of_trial = time;
+          } else {
+            const time_since_start_of_trial = time - start_of_trial;
+            for (var i = 0; i < stimuli.length; i++) {
+              stimuli[i].update_position(current_observation_index, time_since_start_of_trial);
+            }
           }
         }
 
@@ -265,10 +269,32 @@
       }
     }
 
+    function handle_mouseclick(event) {
+      var x = event.offsetX;
+      var y = event.offsetY;
+      if (is_inside_response_widget(x, y)) {
+        jsPsych.finishTrial();
+      }
+    }
+
     function start_handling_canvas_mousemove() {
       let canvas = document.getElementById("jspsych-canvas-stimulus");
       if (canvas) {
         canvas.onmousemove = handle_mousemove;
+      }
+    }
+
+    function start_handling_canvas_mouseclick() {
+      let canvas = document.getElementById("jspsych-canvas-stimulus");
+      if (canvas) {
+        canvas.addEventListener('click', handle_mouseclick);
+      }
+    }
+
+    function stop_handling_canvas_mouseclick() {
+      let canvas = document.getElementById("jspsych-canvas-stimulus");
+      if (canvas) {
+        canvas.removeEventListener('click', handle_mouseclick);
       }
     }
 
@@ -283,18 +309,30 @@
       return gain;
     }
 
+    var keyboard_listener;
+
     var trial_pre = {
         type:"canvas-keyboard-response",
         stimulus: draw_canvas,
         canvas_size: [CANVAS_HEIGHT, CANVAS_WIDTH],
         choices: jsPsych.ALL_KEYS,
         on_load: function() {
+          window.requestAnimationFrame(step_animation);
           start_handling_canvas_mousemove();
+          start_handling_canvas_mouseclick();
+          keyboard_listener = jsPsych.pluginAPI.getKeyboardResponse({
+            callback_function: handle_keyboard_press,
+            valid_responses: [RESPONSE_INCREMENT_KEY, RESPONSE_DECREMENT_KEY],
+            persist: true
+          });
+        },
+        on_finish: function(data) {
+          stop_handling_canvas_mouseclick();
+          data.response = POSSIBLE_RESPONSES[current_response_index];
         }
     };
 
     var main_trials = [];
-    var keyboard_listener;
     for (var i = 0; i < observation_values.length; i++) {
       let observation_value = observation_values[i];
       var trial_i = {
@@ -309,37 +347,22 @@
         },
         on_start: function(trial) {
           current_observation_index = trial.data.observation_index;
-          if (trial.data.observation_index > 0) {
-            // compute the subject's gain for this trial
-            var gain = 0;
-            var last_response = jsPsych.data.getLastTrialData().select("response").values;
-            if (last_response > 0 && last_response < 1) {
-              gain = gain_with_prediction_observation(last_response, observation_value);
-            }
-            feedback_gain = gain;
-            current_score += gain;
-            trial.data.feedback_gain = gain;
-            trial.data.current_score = current_score;
+          // compute the subject's gain for this trial
+          var gain = 0;
+          var last_response = jsPsych.data.getLastTrialData().select("response").values;
+          if (last_response > 0 && last_response < 1) {
+            gain = gain_with_prediction_observation(last_response, observation_value);
           }
+          feedback_gain = gain;
+          current_score += gain;
+          trial.data.feedback_gain = gain;
+          trial.data.current_score = current_score;
         }
       };
-      if (i == 0) {
-        trial_i.on_load = function() {
-          window.requestAnimationFrame(step_animation);
-
-          keyboard_listener = jsPsych.pluginAPI.getKeyboardResponse({
-            callback_function: handle_keyboard_press,
-            valid_responses: [RESPONSE_INCREMENT_KEY, RESPONSE_DECREMENT_KEY],
-            persist: true
-          });
-          start_handling_canvas_mousemove();
-        };
-      } else {
-        trial_i.on_load = function() {
-          start_of_trial = undefined;
-          is_feedback_visible = true;
-          start_handling_canvas_mousemove();
-        }
+      trial_i.on_load = function() {
+        start_of_trial = undefined;
+        is_feedback_visible = true;
+        start_handling_canvas_mousemove();
       }
       // if (i < observation_values.length - 1) {
       trial_i.on_finish = function(data) {
@@ -353,6 +376,9 @@
     }
     var main_procedure = {
       timeline: main_trials,
+      on_timeline_start: function() {
+        is_main_started = true;
+      },
       on_timeline_finish: function() {
         console.log('Experiment has finished.');
         is_main_done = true;
